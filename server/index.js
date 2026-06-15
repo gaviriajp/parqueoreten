@@ -1,4 +1,5 @@
 require('dotenv').config()
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const bcrypt = require('bcrypt')
@@ -20,17 +21,26 @@ const DEFAULT_TARIFAS = {
   'Doble Troque': { horas12: 12000, porHora: 3000, mensual: 320000 }
 }
 
-// Seed admin user if not exists
-const seedAdmin = async () => {
-  const email = 'administrador@parqueo.com'
-  const plain = '@admin20@'
-  db.get('SELECT * FROM usuarios WHERE email = ?', [email], async (err, row) => {
-    if (err) return console.error(err)
-    if (!row) {
+// Seed default users with the same password
+const seedUsers = async () => {
+  const users = [
+    'administrador@parqueo.com',
+    'parqueaderoreten@parqueo.com'
+  ]
+  const plain = '@reten12@'
+
+  users.forEach((email) => {
+    db.get('SELECT * FROM usuarios WHERE email = ?', [email], async (err, row) => {
+      if (err) return console.error(err)
       const hash = await bcrypt.hash(plain, 10)
-      db.run('INSERT INTO usuarios (email, password_hash) VALUES (?, ?)', [email, hash])
-      console.log('Admin seeded')
-    }
+      if (row) {
+        db.run('UPDATE usuarios SET password_hash = ? WHERE email = ?', [hash, email])
+        console.log(`User password updated: ${email}`)
+      } else {
+        db.run('INSERT INTO usuarios (email, password_hash) VALUES (?, ?)', [email, hash])
+        console.log(`User seeded: ${email}`)
+      }
+    })
   })
 
   Object.entries(DEFAULT_TARIFAS).forEach(([tipo, config]) => {
@@ -41,7 +51,7 @@ const seedAdmin = async () => {
   })
 }
 
-seedAdmin()
+seedUsers()
 
 // Auth
 app.post('/api/auth/login', (req, res) => {
@@ -198,6 +208,12 @@ app.delete('/api/recibos/:id', auth, (req, res) => {
     if (err) return res.status(500).json({ error: 'db' })
     res.json({ ok: true })
   })
+})
+
+app.use(express.static(path.join(__dirname, '../dist')))
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'))
 })
 
 const PORT = process.env.PORT || 4000
