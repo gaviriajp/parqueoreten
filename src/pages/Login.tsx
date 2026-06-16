@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { apiUrl } from '../api'
 
 interface Props {
   onLogin: (token: string) => void
@@ -14,7 +15,7 @@ export default function Login({ onLogin }: Props) {
     e.preventDefault()
     setError(null)
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

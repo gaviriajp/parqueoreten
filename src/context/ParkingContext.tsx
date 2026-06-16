@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 import type { ReactNode } from 'react'
 import type { VehiculoActivo, Mensualidad, Recibo, ParkingState, TipoVehiculo } from '../types'
 import { TARIFAS, TARIFAS_MENSUALES } from '../types'
+import { apiUrl } from '../api'
 
 interface ParkingContextType {
   state: ParkingState
@@ -56,7 +57,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
 
     const token = localStorage.getItem('authToken')
     if (!token) return
-    fetch('/api/state', {
+    fetch(apiUrl('/api/state'), {
       headers: { Authorization: `Bearer ${token}` }
     }).then(r => r.json()).then(data => {
       setState(prev => ({
@@ -84,7 +85,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
 
     const token = localStorage.getItem('authToken')
     if (token) {
-      fetch('/api/vehiculos', {
+      fetch(apiUrl('/api/vehiculos'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(nuevo)
@@ -146,7 +147,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem('authToken')
     if (token) {
       const payload = { ...recibo, idVehiculo: vehiculoId }
-      fetch('/api/recibos', {
+      fetch(apiUrl('/api/recibos'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload)
@@ -205,13 +206,13 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
 
       const token = localStorage.getItem('authToken')
       if (token) {
-        fetch('/api/mensualidades', {
+        fetch(apiUrl('/api/mensualidades'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(mensualidad)
         }).catch(e => console.error('save mensualidad', e))
 
-        fetch('/api/recibos', {
+        fetch(apiUrl('/api/recibos'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(recibo)
@@ -228,7 +229,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
     }))
     const token = localStorage.getItem('authToken')
     if (token) {
-      fetch(`/api/mensualidades/${id}`, {
+      fetch(apiUrl(`/api/mensualidades/${id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(updates)
@@ -243,7 +244,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
     }))
     const token = localStorage.getItem('authToken')
     if (token) {
-      fetch(`/api/mensualidades/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }).catch(e => console.error('del mens', e))
+      fetch(apiUrl(`/api/mensualidades/${id}`), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }).catch(e => console.error('del mens', e))
     }
   }, [])
 
@@ -268,7 +269,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
 
     const token = localStorage.getItem('authToken')
     if (token) {
-      fetch(`/api/tarifas/${encodeURIComponent(tipo)}`, {
+      fetch(apiUrl(`/api/tarifas/${encodeURIComponent(tipo)}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ horas12, porHora, mensual })
@@ -295,7 +296,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
     }))
     const token = localStorage.getItem('authToken')
     if (token) {
-      fetch(`/api/vehiculos/${vehiculoId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }).catch(e => console.error('del veh', e))
+      fetch(apiUrl(`/api/vehiculos/${vehiculoId}`), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }).catch(e => console.error('del veh', e))
     }
   }, [])
 
@@ -306,7 +307,7 @@ export const ParkingProvider = ({ children }: { children: ReactNode }) => {
     }))
     const token = localStorage.getItem('authToken')
     if (token) {
-      fetch(`/api/recibos/${reciboId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }).catch(e => console.error('del rec', e))
+      fetch(apiUrl(`/api/recibos/${reciboId}`), { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }).catch(e => console.error('del rec', e))
     }
   }, [])
 
